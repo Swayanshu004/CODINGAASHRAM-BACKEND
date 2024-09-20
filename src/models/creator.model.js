@@ -10,6 +10,11 @@ const creatorSchema = new mongoose.Schema({
     required: true,
     unique: true
   },
+  password: {
+    type: String,
+    required: [true, 'Password cannot be empty. Please enter a password.'],
+    lowercase: true
+  },
   isVerified: {
     type: Boolean,
     default: true
@@ -24,6 +29,4 @@ const creatorSchema = new mongoose.Schema({
     timestamps: true
 });
 
-const Creator = mongoose.model('Creator', creatorSchema);
-
-export default Creator;
+export const Creator = mongoose.model('Creator', creatorSchema);
