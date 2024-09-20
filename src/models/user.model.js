@@ -13,7 +13,6 @@ const userSchema = new mongoose.Schema({
   password: {
     type: String,
     required: [true, 'Password cannot be empty. Please enter a password.'],
-    lowercase: true
   },
   educationLevel: {
     type: String,
@@ -25,15 +24,9 @@ const userSchema = new mongoose.Schema({
     enum: ["Frontend","Backend","Full-Stack","Data scientist","AI Developer"],
     required: true
   },
-  progress: {
-    currentEcademicYear: { 
-        type: Number, 
-        default: 0, 
-        required: true },
-    enfEcademicYear: { 
-        type: Number, 
-        default: 0, 
-        required: true }
+  duration: {
+    type: Number,
+    required: true
   },
   priorKnowledge: {
     type: [String], 
@@ -48,5 +41,14 @@ const userSchema = new mongoose.Schema({
   {
     timestamps: true
 });
+
+userSchema.pre("save" , async function(next){ 
+  if(!this.isModified("password")) return next();
+  this.password = await bcrypt.hash(this.password , 10)
+  next()
+})
+userSchema.methods.isPasswordCorrect = async function(password){
+  return await bcrypt.compare(password , this.password)
+} 
 
 export const User = mongoose.model('User', userSchema);
