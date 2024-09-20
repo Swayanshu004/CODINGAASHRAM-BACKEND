@@ -10,6 +10,11 @@ const userSchema = new mongoose.Schema({
     required: true,
     unique: true
   },
+  password: {
+    type: String,
+    required: [true, 'Password cannot be empty. Please enter a password.'],
+    lowercase: true
+  },
   educationLevel: {
     type: String,
     enum: ['Undergraduate', 'Postgraduate'],
