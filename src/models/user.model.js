@@ -3,44 +3,26 @@ const mongoose = require('mongoose');
 const userSchema = new mongoose.Schema({
   name: {
     type: String,
-    required: true
+    required: [true, 'Name is required.']
   },
   email: {
     type: String,
-    required: true,
+    required: [true, 'Email is required.'],
     unique: true
   },
   password: {
     type: String,
-    required: [true, 'Password cannot be empty. Please enter a password.'],
+    required: [true, 'Password cannot be empty. Please enter a password.']
   },
-  educationLevel: {
-    type: String,
-    enum: ['Undergraduate', 'Postgraduate'],
-    required: true
-  },
-  interests: {
-    type: [String],
-    enum: ["Frontend","Backend","Full-Stack","Data scientist","AI Developer"],
-    required: true
-  },
-  duration: {
-    type: Number,
-    required: true
-  },
-  priorKnowledge: {
-    type: [String], 
-    enum: ['Java', 'Python', 'JavaScript','Rust'], 
-    required: true
-  },
-  futureCareerInterest: {
-    type: String, 
-    enum: ['Software Engineer', 'Data Scientist', 'AI Developer','Consultant'], 
-    required: true
-  }},
-  {
-    timestamps: true
-});
+  roadmaps: {
+    type: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Book"
+      }
+    ], required: true
+  }
+}, {timestamps: true});
 
 userSchema.pre("save" , async function(next){ 
   if(!this.isModified("password")) return next();

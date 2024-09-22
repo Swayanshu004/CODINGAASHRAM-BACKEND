@@ -3,31 +3,31 @@ const mongoose = require('mongoose');
 const creatorSchema = new mongoose.Schema({
   name: {
     type: String,
-    required: true
+    required: [true, 'Name is required.']
   },
   email: {
     type: String,
-    required: true,
+    required: [true, 'Email is required.'],
     unique: true
   },
   password: {
     type: String,
-    required: [true, 'Password cannot be empty. Please enter a password.'],
-    lowercase: true
+    required: [true, 'Password cannot be empty. Please enter a password.']
   },
-  isVerified: {
-    type: Boolean,
-    default: true
+  requestStatus: {
+    type: String,
+    enum: ['pending', 'accepted', 'rejected'],
+    default: 'pending'
   },
-  uploadedContent: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Content'
-    }
-  ],
-}, {
-    timestamps: true
-});
+  contents: {
+    type: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Content"
+      }
+    ], required: true
+  }
+}, {timestamps: true});
 
 creatorSchema.pre("save" , async function(next){ 
   if(!this.isModified("password")) return next();
@@ -37,6 +37,5 @@ creatorSchema.pre("save" , async function(next){
 creatorSchema.methods.isPasswordCorrect = async function(password){
   return await bcrypt.compare(password , this.password)
 } 
-
 
 export const Creator = mongoose.model('Creator', creatorSchema);
