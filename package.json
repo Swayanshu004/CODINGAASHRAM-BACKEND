@@ -10,6 +10,7 @@
   "author": "swayanshu",
   "license": "ISC",
   "dependencies": {
+    "@google/generative-ai": "^0.19.0",
     "dotenv": "^16.4.5",
     "express": "^4.21.0",
     "mongoose": "^8.6.2"

@@ -1,5 +1,6 @@
 import express from "express"
 import { Creator } from "../models/creator.model.js"
+import {generateIndexPage} from "../utils/gemini.js"
 
 const router = express.Router();
 router
@@ -29,3 +30,16 @@ router
             res.status(201).json({token});
         }
     })
+    
+// TESTING :-
+router
+    .post('/aioutput', async(req, res)=>{
+
+        let result = await generateIndexPage(6, ['Frontend Engineer','Backend Engineer','Full Stack Engineer'], ['Medium','LinkedIn','GitHub'], [{skill: 'java', level: 'Basic'},{skill: 'python', level: 'Advanced'}]);
+        console.log(result);
+        
+        res.send(result);
+    })
+
+
+export default router;

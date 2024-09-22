@@ -34,3 +34,5 @@ router
             res.status(201).json({token});
         }
     })
+
+export default router;
