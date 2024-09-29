@@ -1,5 +1,6 @@
 import express from "express"
 import { User } from "../models/user.model.js"
+import jwt from "jsonwebtoken";
 
 const router = express.Router();
 router
@@ -9,7 +10,7 @@ router
             $or: [{ email }]
         })
         if(existedUser){
-            const checkpassword = await User.isPasswordCorrect(password);
+            const checkpassword = await existedUser.isPasswordCorrect(password);
             if(!checkpassword) {
                 res.status(401).send("Incorrect Password ! !")
             }

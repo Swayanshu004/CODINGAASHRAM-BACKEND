@@ -6,6 +6,9 @@ import userRoute from './routes/user.route.js'
 
 const app = express();
 
+app.use(express.urlencoded({ extended: true }))
+app.use(express.json())
+
 connectDB()
 .then(()=>{
     console.log("- - MongoDB Connected - -");

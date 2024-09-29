@@ -1,16 +1,20 @@
 import express from "express"
 import { Creator } from "../models/creator.model.js"
 import {generateIndexPage} from "../utils/gemini.js"
+import jwt from "jsonwebtoken";
 
 const router = express.Router();
 router
     .post('/login', async(req, res)=>{
+        console.log(req.body);
+        console.log("- - - - - - - - - - - - - - - - - - - - - - ");
+        
         const {email, password} = req.body;
         const existedCreator = await Creator.findOne({
             $or: [{ email }]
         })
         if(existedCreator){
-            const checkpassword = await Creator.isPasswordCorrect(password);
+            const checkpassword = await existedCreator.isPasswordCorrect(password);
             if(!checkpassword) {
                 res.status(401).send("Incorrect Password ! !")
             }
@@ -24,14 +28,20 @@ router
     })
 router
     .post('/signup', async(req, res)=>{
+        // console.log(req.body);
+        // console.log("- - - - - - - - - - - - - - - - - - - - - - ");
+
         const {name, email, password} = req.body;
+        if(!name && !email && !password){
+            res.send("some input values are missing ! !");
+        }
         const existedCreator = await Creator.findOne({
             $or: [{ email }]
         })
         if(existedCreator){
             res.send("Mail id is already associated with an account. Use a different one ! !");
         } else {
-            const creator = await Admin.create({
+            const creator = await Creator.create({
                 name,
                 email,
                 password
