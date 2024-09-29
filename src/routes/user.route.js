@@ -54,15 +54,15 @@ router
     })
 router
     .post('/personalinfo', async(req, res)=>{
-        console.log(req.body);
-        console.log("- - - - - - - - - - - - - - - - - - - - - - ");
+        // console.log(req.body);
+        // console.log("- - - - - - - - - - - - - - - - - - - - - - ");
 
         const userId = "66f9b12c4d80656ea2c06cdd"; // shold not be hard coded
         const existedUser = await User.findOne({
             $or: [{ _id: userId }]
         })
-        const {duration, roles, companies, priorKnowledge} = req.body;
-        if(!duration && !roles && !companies && !priorKnowledge){
+        const {duration, roles, companies, priorKnowledges} = req.body;
+        if(!duration && !roles && !companies && !priorKnowledges){
             res.status(401).send("some input values are missing ! !");
         }
         if(!existedUser){
@@ -72,17 +72,16 @@ router
             duration,
             roles,
             companies,
-            priorKnowledge,
+            priorKnowledges,
         })
-        console.log("book :- ", book._id);
-        
+        // console.log("book :- ", book._id);
         const newUser = await User.findByIdAndUpdate(
             userId,
             {
                 $push: { roadmaps: book } 
             }
         );
-        console.log("user updated :- ", newUser);
+        // console.log("user updated :- ", newUser);
         res.status(201).json({book});
     })
 
