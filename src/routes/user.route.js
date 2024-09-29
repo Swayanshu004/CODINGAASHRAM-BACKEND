@@ -54,29 +54,36 @@ router
     })
 router
     .post('/personalinfo', async(req, res)=>{
-        // console.log(req.body);
-        // console.log("- - - - - - - - - - - - - - - - - - - - - - ");
+        console.log(req.body);
+        console.log("- - - - - - - - - - - - - - - - - - - - - - ");
 
-        const userId = req.userId; 
+        const userId = "66f9b12c4d80656ea2c06cdd"; // shold not be hard coded
+        const existedUser = await User.findOne({
+            $or: [{ _id: userId }]
+        })
         const {duration, roles, companies, priorKnowledge} = req.body;
         if(!duration && !roles && !companies && !priorKnowledge){
             res.status(401).send("some input values are missing ! !");
         }
-        if(existedUser){
-            res.status(401).send("Mail id is already associated with an account. Use a different one ! !");
-        } else {
-            const user = await Book.create({
-                educationLevel,
-                interests,
-                duration,
-                priorKnowledge,
-                futureCareerInterest
-            })
-            const token = jwt.sign({ 
-                userId: user.id,
-            }, process.env.JWT_SECRET_USER)
-            res.status(201).json({token});
+        if(!existedUser){
+            res.status(401).send("No user found with this userId ! !");
         }
+        const book = await Book.create({
+            duration,
+            roles,
+            companies,
+            priorKnowledge,
+        })
+        console.log("book :- ", book._id);
+        
+        const newUser = await User.findByIdAndUpdate(
+            userId,
+            {
+                $push: { roadmaps: book } 
+            }
+        );
+        console.log("user updated :- ", newUser);
+        res.status(201).json({book});
     })
 
 export default router;

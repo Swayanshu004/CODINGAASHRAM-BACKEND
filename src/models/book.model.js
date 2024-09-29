@@ -19,15 +19,15 @@ const bookSchema = new mongoose.Schema({
         type: [
             {
                 skill: {
-                    type: [String],
+                    type: String,
                     enum: ['JavaScript', 'Python', 'Java', 'C++', 'HTML', ''],
-                    level: {
-                        type: String,
-                        enum: ['Beginner', 'Intermediate', 'Advanced', 'Expert'],
-                        required: true
-                    },
                     required: true
-                }
+                },
+                level: {
+                    type: String,
+                    enum: ['Beginner', 'Intermediate', 'Advanced', 'Expert'],
+                    required: true
+                },
             }
         ],
         required: true
