@@ -16,12 +16,8 @@ const userSchema = new mongoose.Schema({
     required: [true, 'Password cannot be empty. Please enter a password.']
   },
   roadmaps: {
-    type: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Book"
-      }
-    ], required: true
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Book",
   }
 }, {timestamps: true});
 

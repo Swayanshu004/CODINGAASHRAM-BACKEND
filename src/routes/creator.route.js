@@ -6,8 +6,8 @@ import jwt from "jsonwebtoken";
 const router = express.Router();
 router
     .post('/login', async(req, res)=>{
-        console.log(req.body);
-        console.log("- - - - - - - - - - - - - - - - - - - - - - ");
+        // console.log(req.body);
+        // console.log("- - - - - - - - - - - - - - - - - - - - - - ");
         
         const {email, password} = req.body;
         const existedCreator = await Creator.findOne({
@@ -23,7 +23,7 @@ router
             }, process.env.JWT_SECRET_CREATOR)
             res.status(201).json({token});
         } else {
-            res.send("Mail id is not associated with an account. Create a account first ! !");
+            res.status(401).send("Mail id is not associated with an account. Create a account first ! !");
         }
     })
 router
@@ -33,13 +33,13 @@ router
 
         const {name, email, password} = req.body;
         if(!name && !email && !password){
-            res.send("some input values are missing ! !");
+            res.status(401).send("some input values are missing ! !");
         }
         const existedCreator = await Creator.findOne({
             $or: [{ email }]
         })
         if(existedCreator){
-            res.send("Mail id is already associated with an account. Use a different one ! !");
+            res.status(401).send("Mail id is already associated with an account. Use a different one ! !");
         } else {
             const creator = await Creator.create({
                 name,
