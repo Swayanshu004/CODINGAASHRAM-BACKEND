@@ -1,6 +1,8 @@
 import express from "express"
 import { User } from "../models/user.model.js"
 import { Book } from "../models/book.model.js"
+import { Chapterai } from "../models/chapterai.model.js"
+import {generateIndexPage, generateSubtopics} from "../utils/gemini.js"
 import jwt from "jsonwebtoken";
 
 const router = express.Router();
@@ -82,7 +84,45 @@ router
             }
         );
         // console.log("user updated :- ", newUser);
-        res.status(201).json({book});
+        const result = await generateIndexPage(duration, roles, companies, priorKnowledges);
+        // console.log("result - ",typeof result);
+        const chapters = JSON.parse(result).roadmap.books[0].chapters;
+        // console.log("chapters - ",typeof chapters);
+        let updatedBook;
+        for (let index = 0; index < chapters.length; index++) {
+            const item = chapters[index];
+            const chapterai = await Chapterai.create({
+                chapterName: item.topicToCover,
+                totalDays: item.day
+            })
+            updatedBook = await Book.findByIdAndUpdate(
+                book._id,
+                {
+                    $push: { chapters: chapterai._id } 
+                }
+            );
+            if (index ===  0){
+                const chapterName = item.topicToCover;
+                const totalDays = item.day;
+                let subtopic = await generateSubtopics(chapterName, totalDays);
+                const chapterList = JSON.parse(subtopic).chapter.subtopics;
+                for (let j = 0; j < chapterList.length; j++) {
+                    await Chapterai.findByIdAndUpdate(
+                        chapterai._id,
+                        {
+                            $push: { subtopicNames: chapterList[j].subtopicName } 
+                        }
+                    );
+                }
+            }
+        }
+        res.status(201).json({updatedBook});
+    })
+router
+    .post('/', async(req, res)=>{
+        console.log(req.body);
+        console.log("- - - - - - - - - - - - - - - - - - - - - - ");
+
     })
 
 export default router;

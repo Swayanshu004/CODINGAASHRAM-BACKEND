@@ -7,7 +7,7 @@ const bookSchema = new mongoose.Schema({
     },
     roles: {
         type: [String],
-        enum: ['Frontend', 'Backend', 'Full-Stack', 'Data scientist', 'AI Developer'],
+        enum: ['Frontend Engineer', 'Backend Engineer', 'Full-Stack Engineer', 'Data scientist', 'AI Developer'],
         required: [true, 'You must choose at least one option.']
     },
     companies: {
@@ -38,7 +38,8 @@ const bookSchema = new mongoose.Schema({
                 type: mongoose.Schema.Types.ObjectId,
                 ref: "Chapterai"
             }
-        ], required: true
+        ], 
+        required: true
     }
 }, {timestamps: true});
 

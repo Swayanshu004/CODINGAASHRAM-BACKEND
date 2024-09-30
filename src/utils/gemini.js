@@ -1,10 +1,10 @@
-import { GoogleGenerativeAI, SchemaType  } from "@google/generative-ai";
+import { GoogleGenerativeAI, SchemaType } from "@google/generative-ai";
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
-const generateIndexPage = async(duration, roles, companies, priorKnowledge)=>{
+const generateIndexPage = async(duration, roles, companies, priorKnowledges)=>{
     let priorKnowledgeString = '';
-    priorKnowledge.map((item)=>{
+    priorKnowledges.map((item)=>{
         priorKnowledgeString += item.level+' '+item.skill+',';
     })
     const schema = {
@@ -47,7 +47,7 @@ const generateIndexPage = async(duration, roles, companies, priorKnowledge)=>{
         },
         },
     };     
-    const prompt = `I am a computer science enthusiast with prior knowledge ${priorKnowledgeString === '' ? 'of nothing' : 'in '+priorKnowledgeString}. My goal is to secure '${roles.toString()}' position 'at ${companies.toString()}' in next ${duration} month Maximum. Analizing how much month do I have could you suggest a personalized roadmap to help me achieve this.Roadmap should contain totalTime(sum of all chapter days) less than or equal to total month i have. avoid giving me options in the topicToCover section.`; 
+    const prompt = `I am a computer science enthusiast with prior knowledge ${priorKnowledgeString === '' ? 'of nothing' : 'in '+priorKnowledgeString}. My goal is to secure '${roles.toString()}' position 'at ${companies.toString()}' in next ${duration} month Maximum. Analizing how much month do I have could you suggest a personalized roadmap to help me achieve this.calculate sum of totaldays. Roadmap should contain total chapters less than or equal to totalDaysSum/30. avoid giving me options in the topicToCover section.`; 
     const model = genAI.getGenerativeModel(
         { 
           model: "gemini-1.5-flash",
@@ -123,7 +123,7 @@ const generateSubtopics = async(chapterName, totalDays)=>{
           },
         }
     );
-    const completion = '';
+    let completion = '';
     try {
         completion = await model.generateContent(prompt);
     } catch (error) {

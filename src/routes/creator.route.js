@@ -1,6 +1,6 @@
 import express from "express"
 import { Creator } from "../models/creator.model.js"
-import {generateIndexPage} from "../utils/gemini.js"
+import {generateIndexPage, generateSubtopics} from "../utils/gemini.js"
 import jwt from "jsonwebtoken";
 
 const router = express.Router();
@@ -57,9 +57,21 @@ router
 router
     .post('/aioutput', async(req, res)=>{
 
-        let result = await generateIndexPage(6, ['Frontend Engineer','Backend Engineer','Full Stack Engineer'], ['Medium','LinkedIn','GitHub'], [{skill: 'java', level: 'Basic'},{skill: 'python', level: 'Advanced'}]);
-        console.log(result);
-        
+        const duration = '12';
+        const roles = [ 'Frontend', 'Backend' ];
+        const companies = [ 'Google', 'Medium' ];
+        const priorKnowledges = [ { skill: 'JavaScript', level: 'Beginner' } ];
+        // let result = await generateIndexPage(6, ['Frontend Engineer','Backend Engineer','Full Stack Engineer'], ['Medium','LinkedIn','GitHub'], [{skill: 'java', level: 'Basic'},{skill: 'python', level: 'Advanced'}]);
+        // console.log(result);
+        const chapterName = "JavaScript Fundamentals";
+        const totalDays = 30;
+        let subtopic = await generateSubtopics(chapterName, totalDays);
+        const result = JSON.parse(subtopic).chapter.subtopics;
+        // let result = await generateIndexPage(duration, roles, companies, priorKnowledges);
+        // console.log("result - ",result);
+
+        // const chapters = result.roadmap.books[0].chapters;
+        // console.log("Chapters - ",chapters);
         res.send(result);
     })
 
