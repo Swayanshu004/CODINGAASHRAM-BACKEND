@@ -17,6 +17,14 @@ const taskAISchema = new mongoose.Schema({
         type: Object,
         required: true
     },
+    locked: {
+        type: Boolean,
+        default: false
+    },
+    opened: {
+        type: Boolean,
+        default: false
+    },
     completed: {
         type: Boolean,
         default: false
