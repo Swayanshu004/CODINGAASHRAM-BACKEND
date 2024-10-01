@@ -31,6 +31,10 @@ const bookSchema = new mongoose.Schema({
             }
         ],
         required: true
+    },    
+    currentChapter: {
+        type: Number,
+        default: -1,
     },
     chapters: {
         type: [

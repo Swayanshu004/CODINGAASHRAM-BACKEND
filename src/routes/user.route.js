@@ -99,7 +99,7 @@ router
             updatedBook = await Book.findByIdAndUpdate(
                 book._id,
                 {
-                    $push: { chapters: chapterai._id } 
+                    $push: { chapters: chapterai._id },
                 }
             );
             if (index ===  0){
@@ -107,6 +107,12 @@ router
                 const totalDays = item.day;
                 let subtopic = await generateSubtopics(chapterName, totalDays);
                 const chapterList = JSON.parse(subtopic).chapter.subtopics;
+                await Book.findByIdAndUpdate(
+                    book._id,
+                    {
+                        $inc: { currentChapter: 1 },
+                    }
+                );
                 for (let j = 0; j < chapterList.length; j++) {
                     const chapter = await Chapterai.findByIdAndUpdate(
                         chapterai._id,
@@ -114,6 +120,81 @@ router
                             $push: { subtopicNames: chapterList[j].subtopicName } 
                         }
                     );
+                    if (j === 0){
+                        const subtopic = chapterList[j].subtopicName;
+                        let taskai = await generateTask(subtopic);
+                        const exercises = JSON.parse(taskai).exercises;
+                        const questions = JSON.parse(taskai).questions;
+                        const resources = JSON.parse(taskai).resources;
+                        const subtopicName = JSON.parse(taskai).subtopic;
+                        
+                        await Chapterai.findByIdAndUpdate(
+                            chapterai._id,
+                            {
+                                $inc: { currentTask: 1 } 
+                            }
+                        );
+                        const task = await Taskai.create({
+                            exercises,
+                            questions,
+                            resources,
+                            subtopicName,
+                            locked: false,
+                        });
+                        await Chapterai.findByIdAndUpdate(
+                            chapterai._id,
+                            {
+                                $push: { tasks: task._id } 
+                            }
+                        )
+                    }
+                }
+            }
+        }
+        res.status(201).json({updatedBook});
+    })
+    
+    // To be tested --
+router
+    .get('/openedTask/:bookId/:chapterId/:taskId', async(req, res)=>{
+        const chapter = await Chapterai.findOne({
+            $or: [{ _id: req.params.chapterId }]
+        });
+        const task = await Taskai.findOne({
+            $or: [{ _id: req.params.taskId }]
+        });
+        console.log(task);
+        
+        if(task.opened){
+            return res.status(201).json({task});
+        } else {
+            const nextTaskIndex = (chapter.currentTask)+1;
+            if(nextTaskIndex === chapter.subtopicNames.length){
+                const book = await Book.findOne({
+                    $or: [{ _id: req.params.bookId }]
+                });
+                const nextChapterIndex = (book.currentChapter)+1;
+                const chapterai = await Chapter.findOne({
+                    $or: [{ _id: book.chapters[nextChapterIndex] }]
+                });
+                const chapterName = nextChapterIndex.topicToCover;
+                const totalDays = nextChapterIndex.day;
+                let subtopic = await generateSubtopics(chapterName, totalDays);
+                const chapterList = JSON.parse(subtopic).chapter.subtopics;
+                await Book.findByIdAndUpdate(
+                    book._id,
+                    {
+                        $inc: { currentChapter: 1 },
+                    }
+                );
+                for (let j = 0; j < chapterList.length; j++) {
+                    await Chapterai.findByIdAndUpdate(
+                        chapterai._id,
+                        {
+                            $push: { subtopicNames: chapterList[j].subtopicName } 
+                        }
+                    );
+                    
                     if (j === 0){
                         const subtopic = chapterList[j].subtopicName;
                         let taskai = await generateTask(subtopic);
@@ -137,12 +218,37 @@ router
                         )
                     }
                 }
+            } else {
+                const subtopic = chapter.subtopicNames[nextTaskIndex];
+                let taskai = await generateTask(subtopic);
+                const exercises = JSON.parse(taskai).exercises;
+                const questions = JSON.parse(taskai).questions;
+                const resources = JSON.parse(taskai).resources;
+                const subtopicName = JSON.parse(taskai).subtopic;
+                
+                const task = await Taskai.create({
+                    exercises,
+                    questions,
+                    resources,
+                    subtopicName,
+                    locked: false
+                });
+                await Chapterai.findByIdAndUpdate(
+                    req.params.chapterId,
+                    {
+                        $push: { tasks: task._id } 
+                    }
+                )
             }
+            await Taskai.findByIdAndUpdate(
+                req.params.taskId,
+                {
+                    $set: { opened: true } 
+                }
+            );
+            return res.status(201).json({task});
         }
-        res.status(201).json({updatedBook});
     })
-
-// To be tested --
 router
     .post('/submitTask/:chapterId/:taskId', async(req, res)=>{
         // console.log(req.body);
@@ -151,7 +257,7 @@ router
         const taskId = req.params.taskId; 
         const chapterId = req.params.chapterId; 
         if(allQuestionCheck && allExerciseChecK){
-            const task = await Taskai.findByIdAndUpdate(
+            await Taskai.findByIdAndUpdate(
                 taskId,
                 {
                     $set: { completed: true } 
@@ -167,16 +273,43 @@ router
                     $set: { locked: false } 
                 }
             );
+            await Chapterai.findByIdAndUpdate(
+                chapterId,
+                {
+                    $inc: { currentTask: 1 } 
+                }
+            );
             res.status(201).json({message : "Answer Submitted - Next Task Unlocked", nextTask: latestTask});
         } else {
             res.status(401).send("Wrong Answer - Check Your Answers Thoroughly Before Submitting");
         }
     })
 router
-    .post('/generateNextTask', async(req, res)=>{
-        console.log(req.body);
-        console.log("- - - - - - - - - - - - - - - - - - - - - - ");
-
+    .get('/userProfile/:userId', async(req, res)=>{
+        const user = await User.findOne({
+            $or: [{ _id: req.params.userId }]
+        });
+        return res.status(201).json(user);
     })
-
+router
+    .get('/chapterList/:bookId', async(req, res)=>{
+        const book = await Book.findOne({
+            $or: [{ _id: req.params.bookId }]
+        });
+        let list = [];
+        for(let i=0 ; i<book.chapters.length ; i++){
+            const chapter = await Chapterai.findOne({
+                $or: [{ _id: book.chapters[i] }]
+            });
+            list[i] = chapter.chapterName;
+        }
+        return res.status(201).json(list);
+    })
+router
+    .get('/taskList/:chapterId', async(req, res)=>{
+        const chapter = await Chapterai.findOne({
+            $or: [{ _id: req.params.chapterId }]
+        });
+        return res.status(201).json(chapter.subtopicNames);
+    })
 export default router;
