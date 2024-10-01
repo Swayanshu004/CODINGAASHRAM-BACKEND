@@ -142,8 +142,38 @@ router
         res.status(201).json({updatedBook});
     })
 
+// To be tested --
 router
-    .post('/', async(req, res)=>{
+    .post('/submitTask/:chapterId/:taskId', async(req, res)=>{
+        // console.log(req.body);
+        // console.log("- - - - - - - - - - - - - - - - - - - - - - ");
+        const {allQuestionCheck, allExerciseChecK} = req.body;
+        const taskId = req.params.taskId; 
+        const chapterId = req.params.chapterId; 
+        if(allQuestionCheck && allExerciseChecK){
+            const task = await Taskai.findByIdAndUpdate(
+                taskId,
+                {
+                    $set: { completed: true } 
+                }
+            );
+            const chapter = await Chapterai.findOne({
+                $or: [{ _id: chapterId }]
+            });
+            const latestTaskId = chapter.tasks[(chapter.tasks.length)-1];
+            const latestTask = await Taskai.findByIdAndUpdate(
+                latestTaskId,
+                {
+                    $set: { locked: false } 
+                }
+            );
+            res.status(201).json({message : "Answer Submitted - Next Task Unlocked", nextTask: latestTask});
+        } else {
+            res.status(401).send("Wrong Answer - Check Your Answers Thoroughly Before Submitting");
+        }
+    })
+router
+    .post('/generateNextTask', async(req, res)=>{
         console.log(req.body);
         console.log("- - - - - - - - - - - - - - - - - - - - - - ");
 
