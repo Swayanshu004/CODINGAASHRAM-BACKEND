@@ -2,8 +2,9 @@ import express from "express"
 import { User } from "../models/user.model.js"
 import { Book } from "../models/book.model.js"
 import { Chapterai } from "../models/chapterai.model.js"
-import {generateIndexPage, generateSubtopics} from "../utils/gemini.js"
+import {generateIndexPage, generateSubtopics, generateTask} from "../utils/gemini.js"
 import jwt from "jsonwebtoken";
+import { Taskai } from "../models/taskai.model.js"
 
 const router = express.Router();
 router
@@ -107,17 +108,40 @@ router
                 let subtopic = await generateSubtopics(chapterName, totalDays);
                 const chapterList = JSON.parse(subtopic).chapter.subtopics;
                 for (let j = 0; j < chapterList.length; j++) {
-                    await Chapterai.findByIdAndUpdate(
+                    const chapter = await Chapterai.findByIdAndUpdate(
                         chapterai._id,
                         {
                             $push: { subtopicNames: chapterList[j].subtopicName } 
                         }
                     );
+                    if (j === 0){
+                        const subtopic = chapterList[j].subtopicName;
+                        let taskai = await generateTask(subtopic);
+                        const exercises = JSON.parse(taskai).exercises;
+                        const questions = JSON.parse(taskai).questions;
+                        const resources = JSON.parse(taskai).resources;
+                        const subtopicName = JSON.parse(taskai).subtopic;
+                        
+                        const task = await Taskai.create({
+                            exercises,
+                            questions,
+                            resources,
+                            subtopicName,
+                            locked: false
+                        });
+                        await Chapterai.findByIdAndUpdate(
+                            chapterai._id,
+                            {
+                                $push: { tasks: task._id } 
+                            }
+                        )
+                    }
                 }
             }
         }
         res.status(201).json({updatedBook});
     })
+
 router
     .post('/', async(req, res)=>{
         console.log(req.body);

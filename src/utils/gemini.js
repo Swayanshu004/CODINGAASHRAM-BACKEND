@@ -224,7 +224,7 @@ const generateTask = async(subtopic)=>{
           },
         }
     );
-    const completion = '';
+    let completion = '';
     try {
         completion = await model.generateContent(prompt);
     } catch (error) {

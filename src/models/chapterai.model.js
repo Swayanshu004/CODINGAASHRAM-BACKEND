@@ -9,6 +9,11 @@ const chapterAISchema = new mongoose.Schema({
         type: Number,
         required: true
     },
+    currentTask: {
+        type: Number,
+        default: -1,
+        required: true
+    },
     subtopicNames: {
         type: [String],
         required: true

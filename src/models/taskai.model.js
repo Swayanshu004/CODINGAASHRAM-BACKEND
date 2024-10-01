@@ -19,7 +19,7 @@ const taskAISchema = new mongoose.Schema({
     },
     locked: {
         type: Boolean,
-        default: false
+        default: true
     },
     opened: {
         type: Boolean,

@@ -20,7 +20,7 @@ const bookSchema = new mongoose.Schema({
             {
                 skill: {
                     type: String,
-                    enum: ['JavaScript', 'Python', 'Java', 'C++', 'HTML', ''],
+                    enum: ['JavaScript', 'Python', 'Java', 'C++', 'HTML'],
                     required: true
                 },
                 level: {
