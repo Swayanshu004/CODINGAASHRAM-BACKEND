@@ -7,12 +7,12 @@ const bookSchema = new mongoose.Schema({
     },
     roles: {
         type: [String],
-        enum: ['Frontend Engineer', 'Backend Engineer', 'Full-Stack Engineer', 'Data scientist', 'AI Developer'],
+        enum: ['Frontend Engineer', 'Frontend Engineer', 'Full-Stack Engineer', 'Data scientist', 'AI Developer'],
         required: [true, 'You must choose at least one option.']
     },
     companies: {
         type: [String],
-        enum: ['Microsoft', 'Google', 'Apple', 'Adobe', 'Medium', ''],
+        enum: ['Microsoft', 'Google', 'Apple', 'Adobe', 'Medium', 'Samsung'],
         required: [true, 'You must choose at least one option.']
     },
     priorKnowledges: {
@@ -20,12 +20,12 @@ const bookSchema = new mongoose.Schema({
             {
                 skill: {
                     type: String,
-                    enum: ['JavaScript', 'Python', 'Java', 'C++', 'HTML'],
+                    enum: ['JavaScript', 'Python', 'Java', 'C++', 'Go'],
                     required: true
                 },
                 level: {
                     type: String,
-                    enum: ['Beginner', 'Intermediate', 'Advanced', 'Expert'],
+                    enum: ['Beginner', 'Intermediate', 'Advanced'],
                     required: true
                 },
             }

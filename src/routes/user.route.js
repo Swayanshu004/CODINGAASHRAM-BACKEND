@@ -54,6 +54,8 @@ router
     })
 router
     .post('/personalinfo', authMiddlewareUser, async(req, res)=>{
+        console.log(req.body);
+        
         const userId = req.userId; // shold not be hard coded
         const existedUser = await User.findOne({
             $or: [{ _id: userId }]
@@ -271,7 +273,7 @@ router
         }
     })
 router
-    .get('/userProfile/:userId', authMiddlewareUser, async(req, res)=>{
+    .get('/userProfile', authMiddlewareUser, async(req, res)=>{
         const user = await User.findOne({
             $or: [{ _id: req.userId }]
         });

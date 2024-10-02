@@ -173,18 +173,18 @@ const generateTask = async(subtopic)=>{
           },
           exercises: {
             type: SchemaType.ARRAY,
-            description: "Array of single-line coding tasks related to the subtopic",
+            description: "Array of single-line code related to the subtopic",
             items: {
               type: SchemaType.OBJECT,
               properties: {
                 task: {
                   type: SchemaType.STRING,
-                  description: "Description of the coding task",
+                  description: "Question of the code task ",
                   nullable: false,
                 },
                 answer: {
                   type: SchemaType.STRING,
-                  description: "Correct answer to the coding task",
+                  description: "Correct code of the code task",
                   nullable: false,
                 },
               },
