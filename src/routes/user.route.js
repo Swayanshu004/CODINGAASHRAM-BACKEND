@@ -3,15 +3,13 @@ import { User } from "../models/user.model.js"
 import { Book } from "../models/book.model.js"
 import { Chapterai } from "../models/chapterai.model.js"
 import {generateIndexPage, generateSubtopics, generateTask} from "../utils/gemini.js"
+import {authMiddlewareUser} from "../middlewares/authorization.middleware.js"
 import jwt from "jsonwebtoken";
 import { Taskai } from "../models/taskai.model.js"
 
 const router = express.Router();
 router
     .post('/login', async(req, res)=>{
-        // console.log(req.body);
-        // console.log("- - - - - - - - - - - - - - - - - - - - - - ");
-
         const {email, password} = req.body;
         const existedUser = await User.findOne({
             $or: [{ email }]
@@ -31,9 +29,6 @@ router
     })
 router
     .post('/signup', async(req, res)=>{
-        // console.log(req.body);
-        // console.log("- - - - - - - - - - - - - - - - - - - - - - ");
-
         const {name, email, password} = req.body;
         if(!name && !email && !password){
             res.status(401).send("some input values are missing ! !");
@@ -52,15 +47,14 @@ router
             const token = jwt.sign({ 
                 userId: user.id,
             }, process.env.JWT_SECRET_USER)
-            res.status(201).json({token});
+            console.log(token);
+            
+            return res.status(201).json({token});
         }
     })
 router
-    .post('/personalinfo', async(req, res)=>{
-        // console.log(req.body);
-        // console.log("- - - - - - - - - - - - - - - - - - - - - - ");
-
-        const userId = "66f9b12c4d80656ea2c06cdd"; // shold not be hard coded
+    .post('/personalinfo', authMiddlewareUser, async(req, res)=>{
+        const userId = req.userId; // shold not be hard coded
         const existedUser = await User.findOne({
             $or: [{ _id: userId }]
         })
@@ -77,18 +71,14 @@ router
             companies,
             priorKnowledges,
         })
-        // console.log("book :- ", book._id);
         const newUser = await User.findByIdAndUpdate(
             userId,
             {
                 $push: { roadmaps: book } 
             }
         );
-        // console.log("user updated :- ", newUser);
         const result = await generateIndexPage(duration, roles, companies, priorKnowledges);
-        // console.log("result - ",typeof result);
         const chapters = JSON.parse(result).roadmap.books[0].chapters;
-        // console.log("chapters - ",typeof chapters);
         let updatedBook;
         for (let index = 0; index < chapters.length; index++) {
             const item = chapters[index];
@@ -153,10 +143,8 @@ router
         }
         res.status(201).json({updatedBook});
     })
-    
-    // To be tested --
 router
-    .get('/openedTask/:bookId/:chapterId/:taskId', async(req, res)=>{
+    .get('/openedTask/:bookId/:chapterId/:taskId', authMiddlewareUser, async(req, res)=>{
         const chapter = await Chapterai.findOne({
             $or: [{ _id: req.params.chapterId }]
         });
@@ -250,9 +238,7 @@ router
         }
     })
 router
-    .post('/submitTask/:chapterId/:taskId', async(req, res)=>{
-        // console.log(req.body);
-        // console.log("- - - - - - - - - - - - - - - - - - - - - - ");
+    .post('/submitTask/:chapterId/:taskId', authMiddlewareUser, async(req, res)=>{
         const {allQuestionCheck, allExerciseChecK} = req.body;
         const taskId = req.params.taskId; 
         const chapterId = req.params.chapterId; 
@@ -285,14 +271,14 @@ router
         }
     })
 router
-    .get('/userProfile/:userId', async(req, res)=>{
+    .get('/userProfile/:userId', authMiddlewareUser, async(req, res)=>{
         const user = await User.findOne({
             $or: [{ _id: req.params.userId }]
         });
         return res.status(201).json(user);
     })
 router
-    .get('/chapterList/:bookId', async(req, res)=>{
+    .get('/chapterList/:bookId', authMiddlewareUser, async(req, res)=>{
         const book = await Book.findOne({
             $or: [{ _id: req.params.bookId }]
         });
@@ -303,13 +289,13 @@ router
             });
             list[i] = chapter.chapterName;
         }
-        return res.status(201).json(list);
+        return res.status(201).json({list,book});
     })
 router
-    .get('/taskList/:chapterId', async(req, res)=>{
+    .get('/taskList/:chapterId', authMiddlewareUser, async(req, res)=>{
         const chapter = await Chapterai.findOne({
             $or: [{ _id: req.params.chapterId }]
         });
-        return res.status(201).json(chapter.subtopicNames);
+        return res.status(201).json(chapter);
     })
 export default router;

@@ -3,8 +3,16 @@ import express from "express"
 import connectDB from "./db/index.js"
 import creatorRoute from './routes/creator.route.js'
 import userRoute from './routes/user.route.js'
+import cors from 'cors'
 
 const app = express();
+
+const corsOptions = {
+    origin: 'http://localhost:3000',
+    methods: "GET, POST, PATCH, DELETE",
+    credential: true
+  }
+app.use(cors(corsOptions))
 
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())

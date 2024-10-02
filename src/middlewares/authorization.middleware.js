@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken";
 
 function authMiddlewareCreator(req, res, next){
-    const authHeader = req.header("authorization");
+    const authHeader = req.header["authorization"];
     try {
         const decoded = jwt.verify(authHeader,process.env.JWT_SECRET_CREATOR);
         if(decoded.creatorId){
@@ -30,6 +30,6 @@ function authMiddlewareUser(req, res, next){
 }
 
 export {
-    authMiddlewareAdmin,
+    authMiddlewareCreator,
     authMiddlewareUser
 }
