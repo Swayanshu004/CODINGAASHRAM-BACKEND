@@ -8,7 +8,7 @@ import cors from 'cors'
 const app = express();
 
 const corsOptions = {
-    origin: 'http://localhost:3000',
+    origin: 'https://www.codingaashram.com',
     methods: "GET, POST, PATCH, DELETE",
     credential: true
   }
