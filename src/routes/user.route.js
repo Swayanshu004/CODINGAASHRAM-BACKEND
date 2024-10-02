@@ -273,7 +273,7 @@ router
 router
     .get('/userProfile/:userId', authMiddlewareUser, async(req, res)=>{
         const user = await User.findOne({
-            $or: [{ _id: req.params.userId }]
+            $or: [{ _id: req.userId }]
         });
         return res.status(201).json(user);
     })
