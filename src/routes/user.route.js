@@ -9,6 +9,10 @@ import { Taskai } from "../models/taskai.model.js"
 
 const router = express.Router();
 router
+    .get('/check', (req, res)=>{
+        res.status(200).send("check succeed");
+    })
+router
     .post('/login', async(req, res)=>{
         const {email, password} = req.body;
         const existedUser = await User.findOne({
