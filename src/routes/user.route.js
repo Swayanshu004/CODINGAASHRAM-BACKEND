@@ -10,7 +10,7 @@ import { Taskai } from "../models/taskai.model.js"
 const router = express.Router();
 router
     .get('/check', (req, res)=>{
-        res.status(200).send("check succeed");
+        res.status(200).send("check for upbot succeed");
     })
 router
     .post('/login', async(req, res)=>{
