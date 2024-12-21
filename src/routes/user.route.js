@@ -51,16 +51,12 @@ router
             const token = jwt.sign({ 
                 userId: user.id,
             }, process.env.JWT_SECRET_USER)
-            console.log(token);
-            
             return res.status(201).json({token});
         }
     })
 router
     .post('/personalinfo', authMiddlewareUser, async(req, res)=>{
-        console.log(req.body);
-        
-        const userId = req.userId; // shold not be hard coded
+        const userId = req.userId;
         const existedUser = await User.findOne({
             $or: [{ _id: userId }]
         })
@@ -157,7 +153,6 @@ router
         const task = await Taskai.findOne({
             $or: [{ _id: req.params.taskId }]
         });
-        console.log(task);
         
         if(task.opened){
             return res.status(201).json({task});
