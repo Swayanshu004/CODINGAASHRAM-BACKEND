@@ -73,6 +73,8 @@ router
             companies,
             priorKnowledges,
         })
+        console.log("-----",duration,roles,companies,priorKnowledges,"-----");
+        
         const newUser = await User.findByIdAndUpdate(
             userId,
             {

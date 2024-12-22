@@ -7,7 +7,7 @@ const bookSchema = new mongoose.Schema({
     },
     roles: {
         type: [String],
-        enum: ['Frontend Engineer', 'Frontend Engineer', 'Full-Stack Engineer', 'Data Scientist', 'AI Developer'],
+        enum: ['Frontend Engineer', 'Backend Engineer', 'Full-Stack Engineer', 'Data Scientist', 'AI Developer'],
         required: [true, 'You must choose at least one option.']
     },
     companies: {
