@@ -6,21 +6,89 @@ import {generateIndexPage, generateSubtopics, generateTask} from "../utils/gemin
 import {authMiddlewareUser} from "../middlewares/authorization.middleware.js"
 import jwt from "jsonwebtoken";
 import { Taskai } from "../models/taskai.model.js"
+import nodemailer from "nodemailer";
+import crypto from "crypto";
+
+console.log(process.env.EMAIL_ADDRESS);
+const transporter = nodemailer.createTransport({
+  service:"gmail",
+  auth: {
+    user: process.env.EMAIL_ADDRESS,
+    pass: process.env.EMAIL_APP_PASSWORD,
+  },
+});
+
+const otpStore = new Map();
+function hashOtp(otp) {
+  return crypto.createHash("sha256").update(otp).digest("hex");
+}
 
 const router = express.Router();
 router
     .get('/check', (req, res)=>{
-        res.status(200).send("check for upbot succeed");
+        res.status(200).json("check for upbot succeed");
     })
+router
+    .post('/generate-otp', async (req, res)=>{
+        try {
+            const {email} = req.body;
+            if (!email) return res.status(400).json({ error: "Email is required" });
+            const otp = Math.floor(Math.random()*1000000).toString();
+            const otpHash = hashOtp(otp);
+            const details = {
+                from: process.env.EMAIL_ADDRESS,
+                to: email,
+                subject: "OTP For CodingAashram Login",
+                text: `Your OTP is ${otp}. It will expire in 5 minutes.`,
+            }
+            otpStore.set(email, { otpHash, expiresAt: Date.now() + 5 * 60 * 1000 });
+            
+            await transporter.sendMail(details);
+            res.status(200).send(`OTP sent to your ${email}`);
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ error: "Failed to send OTP" });
+        }
+    })
+function varifyOtp(email, otp){
+    if (!email || !otp) {
+        console.log({ error: "Email & OTP required" });
+        return false;
+    }
+    const record = otpStore.get(email);
+    if (!record) {
+        console.log({ error: "No OTP found or expired" });
+        return false;
+    }
+    const { otpHash, expiresAt } = record;
+
+    if (Date.now() > expiresAt) {
+        otpStore.delete(email);
+        console.log({ error: "OTP expired" });
+        return false;
+    }
+
+    if (hashOtp(otp) !== otpHash) {
+        console.log({ error: "Invalid OTP" });
+        return false;
+    }
+    console.log("Correct OTP");
+    
+    otpStore.delete(email); 
+    return true;
+}
 router
     .post('/login', async(req, res)=>{
         const {email, password} = req.body;
+        varifyOtp(email, password);
         const existedUser = await User.findOne({
             $or: [{ email }]
         })
         if(existedUser){
-            const checkpassword = await existedUser.isPasswordCorrect(password);
+            let checkpassword = await existedUser.isPasswordCorrect(password);
+            
             if(!checkpassword) {
+
                 res.status(401).send("Incorrect Password ! !")
             }
             const token = jwt.sign({ 
@@ -73,7 +141,7 @@ router
             companies,
             priorKnowledges,
         })
-        console.log("-----",duration,roles,companies,priorKnowledges,"-----");
+        // console.log("-----",duration,roles,companies,priorKnowledges,"-----");
         
         const newUser = await User.findByIdAndUpdate(
             userId,
