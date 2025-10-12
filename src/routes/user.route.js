@@ -80,12 +80,12 @@ function varifyOtp(email, otp){
 router
     .post('/login', async(req, res)=>{
         const {email, password} = req.body;
-        varifyOtp(email, password);
+        const otpCheck = varifyOtp(email, password);
         const existedUser = await User.findOne({
             $or: [{ email }]
         })
         if(existedUser){
-            let checkpassword = await existedUser.isPasswordCorrect(password);
+            let checkpassword = otpCheck || await existedUser.isPasswordCorrect(password);
             
             if(!checkpassword) {
 
@@ -157,7 +157,7 @@ router
             const chapterai = await Chapterai.create({
                 chapterName: item.topicToCover,
                 totalDays: item.day
-            })
+            });
             updatedBook = await Book.findByIdAndUpdate(
                 book._id,
                 {

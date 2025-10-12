@@ -50,7 +50,7 @@ const generateIndexPage = async(duration, roles, companies, priorKnowledges)=>{
     const prompt = `I am a computer science enthusiast with prior knowledge ${priorKnowledgeString === '' ? 'of nothing' : 'in '+priorKnowledgeString}. My goal is to secure '${roles.toString()}' position 'at ${companies.toString()}' in next ${duration} month Maximum. Analizing how much month do I have could you suggest a personalized roadmap to help me achieve this.calculate sum of totaldays. Roadmap should contain total chapters less than or equal to totalDaysSum/30. avoid giving me options in the topicToCover section.`; 
     const model = genAI.getGenerativeModel(
         { 
-          model: "gemini-1.5-flash",
+          model: "gemini-2.5-flash",
           generationConfig: {
             responseMimeType: "application/json",
             responseSchema: schema,
@@ -116,7 +116,7 @@ const generateSubtopics = async(chapterName, totalDays)=>{
     const prompt = `For the chapter '${chapterName}', I have allocated ${days} days to cover the topic. Please divide the chapter into day-by-day subtopics and assign one subtopic per day. Each subtopic should be a logical part of the chapter content and help in building towards mastering the chapter by the end of the allocated days.`;
     const model = genAI.getGenerativeModel(
         { 
-          model: "gemini-1.5-flash",
+          model: "gemini-2.5-flash",
           generationConfig: {
             responseMimeType: "application/json",
             responseSchema: schema,
@@ -217,7 +217,7 @@ const generateTask = async(subtopic)=>{
     const prompt = `For the subtopic '${subtopic}' that I am covering today, please generate the following in JSON format: 1.Multiple key MCQ-based questions with options that test my understanding of the subtopic.That should be standard,Moderate to Difficult Level,Mostly asked in interview (Min 10 to Max 20 question). 2.Multiple tasks with single-line code solutions (no alternatives and avoid questions with similar answers) that reinforce the subtopic with correct answers provided(Min 3 to Max 7 excercise). 3.Best resources to learn this subtopic, including a YouTube video, blogs, and official documentation.`;
     const model = genAI.getGenerativeModel(
         { 
-          model: "gemini-1.5-flash",
+          model: "gemini-2.5-flash",
           generationConfig: {
             responseMimeType: "application/json",
             responseSchema: schema,
