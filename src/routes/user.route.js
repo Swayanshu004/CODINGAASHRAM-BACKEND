@@ -96,7 +96,7 @@ router
             }, process.env.JWT_SECRET_USER)
             res.status(201).json({token});
         } else {
-            res.status(401).send("Mail id is not associated with an account. Create a account first ! !");
+            res.status(501).send("Mail id is not associated with an account. Create a account first ! !");
         }
     })
 router
