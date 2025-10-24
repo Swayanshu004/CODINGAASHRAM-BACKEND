@@ -86,9 +86,7 @@ router
         })
         if(existedUser){
             let checkpassword = otpCheck || await existedUser.isPasswordCorrect(password);
-            
             if(!checkpassword) {
-
                 res.status(401).send("Incorrect Password ! !")
             }
             const token = jwt.sign({ 
